@@ -24,9 +24,9 @@ from urllib.parse import urljoin
 from requests.auth import HTTPDigestAuth
 
 # Configuration Constants
-CAMERA_IP = "192.168.15.164"
+CAMERA_HOST = "192.168.1.100" # Add in your camera host
 CAMERA_USERNAME = "admin"
-CAMERA_PASSWORD = "admin1"
+CAMERA_PASSWORD = "admin"
 
 class PTZOpticsHTTPController:
     def __init__(self, host="ptzoptics.local", username="admin", password="admin"):
@@ -192,9 +192,9 @@ def main():
     
     # Create controller instance
     controller = PTZOpticsHTTPController(
-        host=CAMERA_IP,
+        host=CAMERA.100, # Add in your camera host
         username=CAMERA_USERNAME,
-        password=CAMERA_PASSWORD
+        password=CAMER_PASSWORD
     )
     
     # Set up signal handler for graceful shutdown
