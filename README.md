@@ -27,7 +27,7 @@ Control PTZOptics cameras using VISCA protocol over IP in Python
 ## 📚 Resources
 
 - **[PTZOptics Developer Portal](https://ptzoptics.com/developer-portal)** - Complete API documentation, command references, and developer resources
-- **[PTZOptics Support](https://ptzoptics.com/support/)** - Technical support and FAQs
+- **[PTZOptics Support](https://ptzoptics.com/contact/)** - Technical support and FAQs
 
 
 ## 📄 License
