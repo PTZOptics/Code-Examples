@@ -9,15 +9,15 @@ A collection of code examples for controlling PTZOptics cameras programmatically
 
 ## 📚 Available Examples
 
-### [using-HTTP.py](./using-HTTP.py)
-Control PTZOptics cameras using HTTP-CGI commands in Python
+### using-HTTP [[Python](./python/using-HTTP.py)] [[Node.js](./node/using-HTTP.js)]
+Control PTZOptics cameras using HTTP-CGI commands
 - HTTP-CGI interface with URL-based commands
 - HTTP Digest Authentication support
 - Automatic command cycling demo (5-second intervals)
 
 
-### [using-VISCA.py](./using-VISCA.py)
-Control PTZOptics cameras using VISCA protocol over IP in Python
+### using-VISCA [[Python](./python/using-VISCA.py)] [[Node.js](./node/using-VISCA.js)]
+Control PTZOptics cameras using VISCA protocol over IP
 - Direct VISCA protocol implementation
 - TCP socket communication (default port 5678)
 - Byte-level command control with response interpretation

@@ -1,0 +1,24 @@
+{
+  "name": "ptzoptics-code-examples",
+  "version": "1.0.0",
+  "description": "Node.js examples for controlling PTZOptics cameras using HTTP-CGI and VISCA protocols",
+  "main": "index.js",
+  "scripts": {
+    "http": "node using-HTTP.js",
+    "visca": "node using-VISCA.js"
+  },
+  "keywords": [
+    "ptzoptics",
+    "ptz",
+    "camera",
+    "visca",
+    "http-cgi",
+    "camera-control"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {},
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

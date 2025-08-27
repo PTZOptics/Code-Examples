@@ -40,11 +40,19 @@ class PTZOpticsVISCAController:
             
             # Stop Pan/Tilt
             [0x81, 0x01, 0x06, 0x01, 0x08, 0x08, 0x03, 0x03, 0xFF],
+            
+            # Pan Right (medium speed: pan=0x08, tilt=0x08)
+            [0x81, 0x01, 0x06, 0x01, 0x08, 0x08, 0x02, 0x03, 0xFF],
+            
+            # Stop Pan/Tilt
+            [0x81, 0x01, 0x06, 0x01, 0x08, 0x08, 0x03, 0x03, 0xFF],
         ]
         
         # Command descriptions for logging
         self.command_descriptions = [
             "Pan Left",
+            "Stop Pan/Tilt",
+            "Pan Right", 
             "Stop Pan/Tilt"
         ]
     
