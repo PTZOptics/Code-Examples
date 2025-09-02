@@ -10,14 +10,14 @@ A collection of code examples for controlling PTZOptics cameras programmatically
 
 ## 📚 Available Examples
 
-### HTTP API [[Python](./HTTP API/python/example-http.py)] [[Node.js](./HTTP API/node/example-http.js)]
+### HTTP API [Python](./HTTP API/python/example-http.py) [Node.js](./HTTP API/node/example-http.js)
 Control PTZOptics cameras using HTTP-CGI commands
 - HTTP-CGI interface with URL-based commands
 - HTTP Digest Authentication support
 - Automatic command cycling demo (5-second intervals)
 
 
-### VISCA API [[Python](./VISCA API/python/example-visca.py)] [[Node.js](./VISCA API/node/example-visca.js)]
+### VISCA API [Python](./VISCA API/python/example-visca.py) [Node.js](./VISCA API/node/example-visca.js)
 Control PTZOptics cameras using VISCA protocol over IP
 - Direct VISCA protocol implementation
 - TCP socket communication (default port 5678)
@@ -25,13 +25,8 @@ Control PTZOptics cameras using VISCA protocol over IP
 - Automatic command cycling demo (5-second intervals)
 
 
-### Motion Detection [[](./VISCA API/python/example-visca.py)]
-Control PTZOptics cameras using VISCA protocol over IP
-- Direct VISCA protocol implementation
-- TCP socket communication (default port 5678)
-- Byte-level command control with response interpretation
-- Automatic command cycling demo (5-second intervals)
-
+### Motion Detection [main.py](./Motion Detection/main.py)
+View when motion is detected in an RTSP feed with OpenCV
 
 ## 📚 Resources
 
