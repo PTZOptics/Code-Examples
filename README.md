@@ -26,8 +26,26 @@ Control PTZOptics cameras using VISCA protocol over IP
 
 
 ### Motion Detection [main.py](./Motion%20Detection/main.py)
-View when motion is detected in an RTSP feed with OpenCV
-
+  1. Key Features:
+    - Real-time RTSP streaming with OpenCV
+    - Background subtraction for motion tracking
+    - Face detection using Haar cascades
+    - Visual indicators with bounding boxes (green for motion, red for faces)
+    - Configurable sensitivity and detection parameters
+  2. Command-line options:
+    - --sensitivity: Adjust motion detection sensitivity (default: 25, lower = more sensitive)
+    - --min-area: Set minimum motion area in pixels (default: 300)
+    - --stream: Choose stream quality (1 for high quality, 2 for low latency)
+  3. Requirements:
+    - Python 3.8+
+    - OpenCV and NumPy
+    - PTZOptics camera with RTSP enabled
+  4. Use cases:
+    - Security monitoring
+    - Presence detection
+    - Activity tracking
+    - Event triggering based on motion/faces
+    
 ## 📚 Resources
 
 - **[PTZOptics Developer Portal](https://ptzoptics.com/developer-portal)** - Complete API documentation, command references, and developer resources
