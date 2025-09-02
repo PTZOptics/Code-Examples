@@ -1,0 +1,22 @@
+{
+  "name": "ptzoptics-code-examples-http",
+  "version": "1.0.0",
+  "description": "Node.js examples for controlling PTZOptics cameras using HTTP protocol",
+  "main": "index.js",
+  "scripts": {
+    "start": "node example-http.js"
+  },
+  "keywords": [
+    "ptzoptics",
+    "ptz",
+    "camera",
+    "http",
+    "camera-control"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {},
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

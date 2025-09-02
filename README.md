@@ -6,17 +6,26 @@ A collection of code examples for controlling PTZOptics cameras programmatically
 
 - **HTTP-CGI**: Web-based CGI commands over HTTP
 - **VISCA over IP**: Sony VISCA protocol via TCP/IP
+- **Motion Detection**: RTSP feed motion detector in Python
 
 ## 📚 Available Examples
 
-### using-HTTP [[Python](./python/using-HTTP.py)] [[Node.js](./node/using-HTTP.js)]
+### HTTP API [[Python](./HTTP API/python/example-http.py)] [[Node.js](./HTTP API/node/example-http.js)]
 Control PTZOptics cameras using HTTP-CGI commands
 - HTTP-CGI interface with URL-based commands
 - HTTP Digest Authentication support
 - Automatic command cycling demo (5-second intervals)
 
 
-### using-VISCA [[Python](./python/using-VISCA.py)] [[Node.js](./node/using-VISCA.js)]
+### VISCA API [[Python](./VISCA API/python/example-visca.py)] [[Node.js](./VISCA API/node/example-visca.js)]
+Control PTZOptics cameras using VISCA protocol over IP
+- Direct VISCA protocol implementation
+- TCP socket communication (default port 5678)
+- Byte-level command control with response interpretation
+- Automatic command cycling demo (5-second intervals)
+
+
+### Motion Detection [[](./VISCA API/python/example-visca.py)]
 Control PTZOptics cameras using VISCA protocol over IP
 - Direct VISCA protocol implementation
 - TCP socket communication (default port 5678)
