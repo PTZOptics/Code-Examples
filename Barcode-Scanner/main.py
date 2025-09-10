@@ -13,9 +13,8 @@ Requirements:
 
 import argparse
 import cv2
-#import numpy as np
+import numpy as np
 from pyzbar import pyzbar
-from curses.ascii import isalnum
 #import matplotlib.pyplot as plt
 import time
 
@@ -87,48 +86,56 @@ class BarcodeScanner:
         """
         # Convert the frame to grayscale
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        # Computer the Scharr gradient magnitude and representation of the images
+        ddepth = cv2.CV_32F
+        gradient_x = cv2.Sobel(gray, ddepth=ddepth, dx=1, dy=0, ksize=-1)
+        gradient_y = cv2.Sobel(gray, ddepth=ddepth, dx=0, dy=1, ksize=-1)
+
+        # Subtract the gradient_y from the gradient_x
+        gradient = cv2.subtract(gradient_x, gradient_y)
+        gradient = cv2.convertScaleAbs(gradient)
 
         # Apply Gaussian blur to reduce noise
-        blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+        blurred = cv2.blur(gradient, (9,9))
+        #blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+        (_, threshold) = cv2.threshold(blurred, 255, 255, cv2.THRESH_BINARY)
 
-        # Use edge detection to find potential barcode regions
-        edges = cv2.Canny(blurred, 50, 200)
+        # Construct a closing kernel and apply it to the thresholded image
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (21, 7))
+        closed = cv2.morphologyEx(threshold, cv2.MORPH_CLOSE, kernel)
+
+        # Perform a series of erosions and dilations
+        closed = cv2.erode(closed, kernel, iterations=4)
+        closed = cv2.dilate(closed, kernel, iterations=4)
 
         # Find contours in the edge-detected image
-        contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contours, _ = cv2.findContours(closed.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        if contours:
+            largest_contour = max(contours, key=lambda c: cv2.contourArea(np.array(c)), default=None)
+            x, y, w, h = cv2.boundingRect(np.array(largest_contour))
+            # Return the bounding box coordinates
+            #return x, y, w, h
+            #             # Crop the region of interest (ROI) for decoding
+            roi = frame[y:y + h, x:x + w]
 
-        detected_barcodes = []
+            # Attempt to decode the barcode using pyzbar
+            decoded_objects = pyzbar.decode(roi)
+            if decoded_objects:
+                # Extract the first decoded barcode's data and type
+                barcode_data = decoded_objects[0].data.decode("utf-8")
+                barcode_type = decoded_objects[0].type
 
-        for contour in contours:
-            # Approximate the contour to a polygon
-            epsilon = 0.02 * cv2.arcLength(contour, True)
-            approx = cv2.approxPolyDP(contour, epsilon, True)
+                # Draw the rectangle on the frame
+                cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
 
-            # Ignore small or non-rectangular contours
-            if len(approx) < 4 or cv2.contourArea(contour) < 100:
-                continue
-
-            # Get the bounding box of the contour
-            x, y, w, h = cv2.boundingRect(approx)
-
-            # Extract the region of interest (ROI) for barcode decoding
-            roi = gray[y:y + h, x:x + w]
-
-            # Decode barcodes in the ROI
-            barcodes = pyzbar.decode(roi)
-
-            for barcode in barcodes:
-                barcode_data = barcode.data.decode("utf-8")
-                barcode_type = barcode.type
-
-                # Append the detected barcode information
-                detected_barcodes.append({
+                # Return the bounding box and decoded information
+                return {
+                    "rect": (x, y, w, h),
                     "data": barcode_data,
-                    "type": barcode_type,
-                    "rect": (x, y, w, h)
-                })
-
-        return detected_barcodes
+                    "type": barcode_type
+                }
+        else:
+            return None
 
     def detect_barcode_from_frame(self, frame):
         """
@@ -143,20 +150,19 @@ class BarcodeScanner:
         Returns:
             numpy.ndarray: The annotated frame with barcode information, or None if no barcodes are detected.
         """
-        detected_barcodes = self.recognize_and_decode_barcodes(frame.copy())
+        barcode_info = self.recognize_and_decode_barcodes(frame.copy())
 
-        if detected_barcodes:
-            for barcode in detected_barcodes:
-                x, y, w, h = barcode["rect"]
-                barcode_data = barcode["data"]
-                barcode_type = barcode["type"]
+        if barcode_info:
+            x, y, w, h = barcode_info["rect"]
+            barcode_data = barcode_info["data"]
+            barcode_type = barcode_info["type"]
 
-                # Draw a rectangle around the barcode
-                cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
+            # Draw a rectangle around the barcode
+            cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
 
-                # Put barcode data and type on the image
-                cv2.putText(frame, f"{barcode_data} ({barcode_type})",
-                            (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
+            # Put barcode data and type on the image
+            cv2.putText(frame, f"{barcode_data} ({barcode_type})",
+                        (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
             return frame
         else:
             return None
