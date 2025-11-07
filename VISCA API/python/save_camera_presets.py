@@ -2,10 +2,10 @@
 PTZOptics VISCA Preset Position Query
 """
 
-import socket
-import time
-import sys
 import json
+import socket
+import sys
+import time
 
 TIME_BETWEEN_PRESET_AND_INQUIRY = 10  # Seconds
 INITIAL_POSITION_CHECK_DELAY = 1  # Seconds - brief delay to check if preset exists
@@ -157,10 +157,26 @@ def main():
         ip_address = input("Please enter an IP address: ")
         port_str = input("Please enter TCP Port # [default: 5678]: ").strip()
         port = int(port_str) if port_str else 5678
-        start_preset_str = input("Please enter starting preset (0-254): ")
-        end_preset_str = input("Please enter ending preset (0-254): ")
-        capture_focus_str = input("Capture focus position? (y/n) [default: n]: ").strip().lower()
-        capture_focus = capture_focus_str == 'y'  # Default to False unless 'y' is entered
+        """
+        Preset Ranges:
+            1-89 -> Assignable
+              90 -> Calls Home Position
+           91-94 -> Reserved
+              95 -> Toggles OSD
+           96-99 -> Reserved
+             150 -> Enable Tracking
+             151 -> Disable Tracking
+        """
+        start_preset_str = input(
+            "Please enter starting preset (1-89, 100-149, 152-254): "
+        )
+        end_preset_str = input("Please enter ending preset (1-89, 100-149, 152-254): ")
+        capture_focus_str = (
+            input("Capture focus position? (y/n) [default: n]: ").strip().lower()
+        )
+        capture_focus = (
+            capture_focus_str == "y"
+        )  # Default to False unless 'y' is entered
     except Exception as e:
         print(
             "Please verify your IP address and enter a number for port, start/end preset numbers."
@@ -171,8 +187,18 @@ def main():
     try:
         start_preset = int(start_preset_str)
         end_preset = int(end_preset_str)
-        if not (0 <= start_preset <= 255) or not (0 <= end_preset <= 255):
-            print("Presets must be between 0 and 255")
+        if not (
+            1 <= start_preset <= 89
+            or 100 <= start_preset <= 149
+            or 152 <= start_preset <= 254
+        ) or not (
+            1 <= end_preset <= 89
+            or 100 <= end_preset <= 149
+            or 152 <= end_preset <= 254
+        ):
+            print(
+                "Presets must be between 1 and 89, or between 100 and 149, or between 152 and 254"
+            )
             sys.exit(1)
         if start_preset > end_preset:
             print("Starting preset must be less than or equal to ending preset")
@@ -191,7 +217,9 @@ def main():
         # Initialize camera to HOME position with max speed
         controller.set_max_preset_speed()
         controller.go_home()
-        print(f"Waiting {TIME_BETWEEN_PRESET_AND_INQUIRY} seconds for HOME movement to complete...")
+        print(
+            f"Waiting {TIME_BETWEEN_PRESET_AND_INQUIRY} seconds for HOME movement to complete..."
+        )
         time.sleep(TIME_BETWEEN_PRESET_AND_INQUIRY)
         controller.clear_buffer()
 
@@ -206,10 +234,14 @@ def main():
         skipped_presets = []
 
         for preset in range(start_preset, end_preset + 1):
+            if 90 <= preset <= 99:
+                continue
             controller.recall_preset(preset)
 
             # Brief delay to allow movement to start
-            print(f"Waiting {INITIAL_POSITION_CHECK_DELAY} second(s) to check if preset exists...")
+            print(
+                f"Waiting {INITIAL_POSITION_CHECK_DELAY} second(s) to check if preset exists..."
+            )
             time.sleep(INITIAL_POSITION_CHECK_DELAY)
             controller.clear_buffer()
 
@@ -217,7 +249,9 @@ def main():
             current_position = controller.get_position(capture_focus=capture_focus)
 
             if current_position == home_position:
-                print(f"Preset {preset} appears to not exist (still at HOME). Skipping.\n")
+                print(
+                    f"Preset {preset} appears to not exist (still at HOME). Skipping.\n"
+                )
                 skipped_presets.append(preset)
                 continue
 
@@ -245,7 +279,9 @@ def main():
 
         print(f"\nSaved {len(all_positions)} preset positions to preset_positions.json")
         if skipped_presets:
-            print(f"Skipped {len(skipped_presets)} non-existent presets: {skipped_presets}")
+            print(
+                f"Skipped {len(skipped_presets)} non-existent presets: {skipped_presets}"
+            )
 
     finally:
         controller.disconnect()
