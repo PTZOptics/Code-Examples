@@ -3,11 +3,11 @@ PTZOptics VISCA Preset Position Restore
 Restores preset positions from preset_positions.json to the camera
 """
 
-import socket
-import time
-import sys
 import json
 import os
+import socket
+import sys
+import time
 
 TIME_BETWEEN_MOVES = 10  # Seconds to wait for camera to reach position
 TIMEOUT = 10  # Seconds
@@ -114,13 +114,25 @@ class PTZOpticsVISCAController:
         tilt_z4 = tilt_value & 0x0F
 
         command = [
-            0x81, 0x01, 0x06, 0x02,
-            pan_speed, tilt_speed,
-            pan_y1, pan_y2, pan_y3, pan_y4,
-            tilt_z1, tilt_z2, tilt_z3, tilt_z4,
-            0xFF
+            0x81,
+            0x01,
+            0x06,
+            0x02,
+            pan_speed,
+            tilt_speed,
+            pan_y1,
+            pan_y2,
+            pan_y3,
+            pan_y4,
+            tilt_z1,
+            tilt_z2,
+            tilt_z3,
+            tilt_z4,
+            0xFF,
         ]
-        print(f"Setting pan/tilt to {pan_hex}/{tilt_hex} at speed {pan_speed:02X}/{tilt_speed:02X}...")
+        print(
+            f"Setting pan/tilt to {pan_hex}/{tilt_hex} at speed {pan_speed:02X}/{tilt_speed:02X}..."
+        )
         self.send_command(command)
         time.sleep(0.2)
         self.clear_buffer()
@@ -183,13 +195,17 @@ def main():
             # Extract preset number from key like "preset_0", "preset_1", etc.
             preset_number = int(preset_key.split("_")[1])
 
-            print(f"\n{'='*60}")
+            print(f"\n{'=' * 60}")
             print(f"Restoring {preset_key} (preset #{preset_number})")
             print(f"Position data: {position_data}")
-            print(f"{'='*60}")
+            print(f"{'=' * 60}")
 
             # Check if we have required position data
-            if "pan" not in position_data or "tilt" not in position_data or "zoom" not in position_data:
+            if (
+                "pan" not in position_data
+                or "tilt" not in position_data
+                or "zoom" not in position_data
+            ):
                 print(f"Warning: Incomplete position data for {preset_key}. Skipping.")
                 skipped_count += 1
                 continue
@@ -199,12 +215,13 @@ def main():
 
             # Set pan/tilt position
             controller.set_pan_tilt_position(
-                position_data["pan"],
-                position_data["tilt"]
+                position_data["pan"], position_data["tilt"]
             )
 
             # Wait for camera to reach position
-            print(f"Waiting {TIME_BETWEEN_MOVES} seconds for camera to reach position...")
+            print(
+                f"Waiting {TIME_BETWEEN_MOVES} seconds for camera to reach position..."
+            )
             time.sleep(TIME_BETWEEN_MOVES)
             controller.clear_buffer()
 
@@ -216,12 +233,12 @@ def main():
                 print(f"✗ Failed to save preset {preset_number}\n")
                 skipped_count += 1
 
-        print(f"\n{'='*60}")
-        print(f"Restoration complete!")
+        print(f"\n{'=' * 60}")
+        print("Restoration complete!")
         print(f"Restored: {restored_count} presets")
         if skipped_count > 0:
             print(f"Skipped: {skipped_count} presets")
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
 
     finally:
         controller.disconnect()
