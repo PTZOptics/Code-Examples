@@ -7,9 +7,38 @@ import socket
 import sys
 import time
 
-TIME_BETWEEN_PRESET_AND_INQUIRY = 10  # Seconds
-INITIAL_POSITION_CHECK_DELAY = 1  # Seconds - brief delay to check if preset exists
 TIMEOUT = 10  # Seconds
+
+
+# PTZOptics Blue: #93cce8 -> RGB(147, 206, 232)
+class Colors:
+    PTZOPTICS_BLUE = "\033[38;2;147;206;232m"
+    BRIGHT_BLUE = "\033[94m"
+    GREEN = "\033[92m"
+    YELLOW = "\033[93m"
+    RED = "\033[91m"
+    RESET = "\033[0m"
+    BOLD = "\033[1m"
+    DIM = "\033[2m"
+
+
+def print_banner():
+    """Display PTZOptics ASCII art banner"""
+    banner = f"""{Colors.PTZOPTICS_BLUE}{Colors.BOLD}
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                                                                           ║
+║   ██████╗ ████████╗███████╗ ██████╗ ██████╗ ████████╗██╗ ██████╗███████╗  ║
+║   ██╔══██╗╚══██╔══╝╚══███╔╝██╔═══██╗██╔══██╗╚══██╔══╝██║██╔════╝██╔════╝  ║
+║   ██████╔╝   ██║     ███╔╝ ██║   ██║██████╔╝   ██║   ██║██║     ███████╗  ║
+║   ██╔═══╝    ██║    ███╔╝  ██║   ██║██╔═══╝    ██║   ██║██║     ╚════██║  ║
+║   ██║        ██║   ███████╗╚██████╔╝██║        ██║   ██║╚██████╗███████║  ║
+║   ╚═╝        ╚═╝   ╚══════╝ ╚═════╝ ╚═╝        ╚═╝   ╚═╝ ╚═════╝╚══════╝  ║
+║                                                                           ║
+║                   {Colors.RESET}{Colors.PTZOPTICS_BLUE}VISCA Preset Position Saver{Colors.BOLD}                             ║
+║                                                                           ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+{Colors.RESET}"""
+    print(banner)
 
 
 class PTZOpticsVISCAController:
@@ -153,24 +182,47 @@ class PTZOpticsVISCAController:
 
 
 def main():
+    print_banner()
+
     try:
         ip_address = input("Please enter an IP address: ")
         port_str = input("Please enter TCP Port # [default: 5678]: ").strip()
         port = int(port_str) if port_str else 5678
-        """
-        Preset Ranges:
-            1-89 -> Assignable
-              90 -> Calls Home Position
-           91-94 -> Reserved
-              95 -> Toggles OSD
-           96-99 -> Reserved
-             150 -> Enable Tracking
-             151 -> Disable Tracking
-        """
+
+        print("\n" + "=" * 65)
+        print("Preset Ranges:")
+        print("    1-89    → Assignable")
+        print("      90    → Calls Home Position")
+        print("   91-94    → Reserved")
+        print("      95    → Toggles OSD")
+        print("   96-99    → Reserved")
+        print("     150    → Enable Tracking")
+        print("     151    → Disable Tracking")
+        print("=" * 65 + "\n")
+
         start_preset_str = input(
             "Please enter starting preset (1-89, 100-149, 152-254): "
         )
         end_preset_str = input("Please enter ending preset (1-89, 100-149, 152-254): ")
+
+        print("\n" + "=" * 65)
+        print("Timing Configuration")
+        print("=" * 65)
+        print("⚠️  WARNING: Using less than 10 seconds may cause incomplete movements")
+        print("    Recommended: 10+ seconds for reliable preset capture\n")
+
+        time_between_str = input(
+            "Seconds to wait for camera movement [default: 10]: "
+        ).strip()
+        time_between_preset = int(time_between_str) if time_between_str else 10
+
+        initial_check_str = input(
+            "Seconds for initial preset check [default: 1]: "
+        ).strip()
+        initial_check_delay = int(initial_check_str) if initial_check_str else 1
+
+        print("=" * 65 + "\n")
+
         capture_focus_str = (
             input("Capture focus position? (y/n) [default: n]: ").strip().lower()
         )
@@ -218,9 +270,9 @@ def main():
         controller.set_max_preset_speed()
         controller.go_home()
         print(
-            f"Waiting {TIME_BETWEEN_PRESET_AND_INQUIRY} seconds for HOME movement to complete..."
+            f"Waiting {time_between_preset} seconds for HOME movement to complete..."
         )
-        time.sleep(TIME_BETWEEN_PRESET_AND_INQUIRY)
+        time.sleep(time_between_preset)
         controller.clear_buffer()
 
         home_position = controller.get_position(capture_focus=capture_focus)
@@ -240,9 +292,9 @@ def main():
 
             # Brief delay to allow movement to start
             print(
-                f"Waiting {INITIAL_POSITION_CHECK_DELAY} second(s) to check if preset exists..."
+                f"Waiting {initial_check_delay} second(s) to check if preset exists..."
             )
-            time.sleep(INITIAL_POSITION_CHECK_DELAY)
+            time.sleep(initial_check_delay)
             controller.clear_buffer()
 
             # Check if position changed from HOME
@@ -257,9 +309,9 @@ def main():
 
             # Position changed, wait for full movement to complete
             print(
-                f"Preset {preset} exists. Waiting {TIME_BETWEEN_PRESET_AND_INQUIRY} seconds for movement to complete..."
+                f"Preset {preset} exists. Waiting {time_between_preset} seconds for movement to complete..."
             )
-            time.sleep(TIME_BETWEEN_PRESET_AND_INQUIRY)
+            time.sleep(time_between_preset)
             controller.clear_buffer()
 
             # Get final position
@@ -271,7 +323,7 @@ def main():
 
             # Return to HOME for next preset
             controller.go_home()
-            time.sleep(TIME_BETWEEN_PRESET_AND_INQUIRY)
+            time.sleep(time_between_preset)
             controller.clear_buffer()
 
         with open("preset_positions.json", "w") as f:
@@ -288,4 +340,8 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        print(f"\n\n{Colors.YELLOW}Operation cancelled by user. Exiting gracefully...{Colors.RESET}")
+        sys.exit(0)
