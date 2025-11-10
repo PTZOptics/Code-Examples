@@ -9,8 +9,38 @@ import socket
 import sys
 import time
 
-TIME_BETWEEN_MOVES = 10  # Seconds to wait for camera to reach position
 TIMEOUT = 10  # Seconds
+
+
+# PTZOptics Blue: #93cce8 -> RGB(147, 206, 232)
+class Colors:
+    PTZOPTICS_BLUE = "\033[38;2;147;206;232m"
+    BRIGHT_BLUE = "\033[94m"
+    GREEN = "\033[92m"
+    YELLOW = "\033[93m"
+    RED = "\033[91m"
+    RESET = "\033[0m"
+    BOLD = "\033[1m"
+    DIM = "\033[2m"
+
+
+def print_banner():
+    """Display PTZOptics ASCII art banner"""
+    banner = f"""{Colors.PTZOPTICS_BLUE}{Colors.BOLD}
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                                                                           ║
+║   ██████╗ ████████╗███████╗ ██████╗ ██████╗ ████████╗██╗ ██████╗███████╗  ║
+║   ██╔══██╗╚══██╔══╝╚══███╔╝██╔═══██╗██╔══██╗╚══██╔══╝██║██╔════╝██╔════╝  ║
+║   ██████╔╝   ██║     ███╔╝ ██║   ██║██████╔╝   ██║   ██║██║     ███████╗  ║
+║   ██╔═══╝    ██║    ███╔╝  ██║   ██║██╔═══╝    ██║   ██║██║     ╚════██║  ║
+║   ██║        ██║   ███████╗╚██████╔╝██║        ██║   ██║╚██████╗███████║  ║
+║   ╚═╝        ╚═╝   ╚══════╝ ╚═════╝ ╚═╝        ╚═╝   ╚═╝ ╚═════╝╚══════╝  ║
+║                                                                           ║
+║                  {Colors.RESET}{Colors.PTZOPTICS_BLUE}VISCA Preset Position Restorer{Colors.BOLD}                           ║
+║                                                                           ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+{Colors.RESET}"""
+    print(banner)
 
 
 class PTZOpticsVISCAController:
@@ -89,6 +119,24 @@ class PTZOpticsVISCAController:
         time.sleep(0.2)
         self.clear_buffer()
 
+    def set_focus_position(self, focus_hex):
+        """Set focus to specific position
+
+        Args:
+            focus_hex: Hex string like "0000" or "4000"
+        """
+        focus_value = int(focus_hex, 16)
+        p = (focus_value >> 12) & 0x0F
+        q = (focus_value >> 8) & 0x0F
+        r = (focus_value >> 4) & 0x0F
+        s = focus_value & 0x0F
+
+        command = [0x81, 0x01, 0x04, 0x48, p, q, r, s, 0xFF]
+        print(f"Setting focus to {focus_hex}...")
+        self.send_command(command)
+        time.sleep(0.2)
+        self.clear_buffer()
+
     def set_pan_tilt_position(self, pan_hex, tilt_hex, pan_speed=0x18, tilt_speed=0x18):
         """Set pan/tilt to specific position
 
@@ -156,6 +204,8 @@ class PTZOpticsVISCAController:
 
 
 def main():
+    print_banner()
+
     # Check if preset file exists
     if not os.path.exists("preset_positions.json"):
         print("Error: preset_positions.json not found!")
@@ -176,6 +226,19 @@ def main():
         ip_address = input("Please enter an IP address: ")
         port_str = input("Please enter TCP Port # [default: 5678]: ").strip()
         port = int(port_str) if port_str else 5678
+
+        print("\n" + "=" * 65)
+        print("Timing Configuration")
+        print("=" * 65)
+        print("⚠️  WARNING: Using less than 10 seconds may cause incomplete movements")
+        print("    Recommended: 10+ seconds for reliable preset restoration\n")
+
+        time_between_str = input(
+            "Seconds to wait for camera to reach position [default: 10]: "
+        ).strip()
+        time_between_moves = int(time_between_str) if time_between_str else 10
+
+        print("=" * 65 + "\n")
     except Exception as e:
         print("Please verify your IP address and enter a valid port number.")
         print(e)
@@ -213,6 +276,10 @@ def main():
             # Set zoom position
             controller.set_zoom_position(position_data["zoom"])
 
+            # Set focus position if available
+            if "focus" in position_data:
+                controller.set_focus_position(position_data["focus"])
+
             # Set pan/tilt position
             controller.set_pan_tilt_position(
                 position_data["pan"], position_data["tilt"]
@@ -220,9 +287,9 @@ def main():
 
             # Wait for camera to reach position
             print(
-                f"Waiting {TIME_BETWEEN_MOVES} seconds for camera to reach position..."
+                f"Waiting {time_between_moves} seconds for camera to reach position..."
             )
-            time.sleep(TIME_BETWEEN_MOVES)
+            time.sleep(time_between_moves)
             controller.clear_buffer()
 
             # Save the preset
@@ -245,4 +312,10 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        print(
+            f"\n\n{Colors.YELLOW}Operation cancelled by user. Exiting gracefully...{Colors.RESET}"
+        )
+        sys.exit(0)
