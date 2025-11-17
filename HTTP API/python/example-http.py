@@ -69,7 +69,7 @@ class PTZOpticsHTTPController:
         # Command descriptions for logging
         self.command_descriptions = [
             "Pan Left (Speed 12/10)",
-            "Stop Pan/Tilt"
+            "Stop Pan/Tilt",
             "Pan Right (Speed 12/10)",
         ]
     
@@ -192,9 +192,9 @@ def main():
     
     # Create controller instance
     controller = PTZOpticsHTTPController(
-        host=CAMERA.100, # Add in your camera host
+        host=CAMERA_HOST,
         username=CAMERA_USERNAME,
-        password=CAMER_PASSWORD
+        password=CAMERA_PASSWORD
     )
     
     # Set up signal handler for graceful shutdown
