@@ -10,11 +10,12 @@ A collection of code examples for controlling PTZOptics cameras programmatically
 
 ## 📚 Available Examples
 
-### HTTP API [Python](./HTTP%20API/python/example-http.py) [Node.js](./HTTP%20API/node/example-http.js)
+### HTTP API [Python](./HTTP%20API/python/example-http.py) [Node.js](./HTTP%20API/node/example-http.js) [C#](./HTTP%20API/csharp/PresetRecall/Program.cs)
 Control PTZOptics cameras using HTTP-CGI commands
 - HTTP-CGI interface with URL-based commands
 - HTTP Digest Authentication support
 - Automatic command cycling demo (5-second intervals)
+- Preset recall functionality with configurable camera settings
 
 
 ### VISCA API [Python](./VISCA%20API/python/example-visca.py) [Node.js](./VISCA%20API/node/example-visca.js)
