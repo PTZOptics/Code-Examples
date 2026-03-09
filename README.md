@@ -51,6 +51,7 @@ Control PTZOptics cameras using VISCA protocol over IP
 
 - **[PTZOptics Developer Portal](https://ptzoptics.com/developer-portal)** - Complete API documentation, command references, and developer resources
 - **[PTZOptics Support](https://ptzoptics.com/contact/)** - Technical support and FAQs
+- **[Visual Reasoning Playground](https://github.com/streamgeeks/visual-reasoning-playground)** - Additional StreamGeeks/PTZOptics code examples focused on visual reasoning
 
 
 ## 📄 License
